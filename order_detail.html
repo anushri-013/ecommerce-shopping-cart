@@ -1,0 +1,39 @@
+<!-- order_detail.html -->
+{% extends "base.html" %}
+
+{% block title %}Order Details{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Order #{{ order.id }}</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <p><strong>Order Date:</strong> {{ order.created_at }}</p>
+        <p><strong>Total Amount:</strong> ₹{{ order.total }}</p>
+    </div>
+</div>
+
+<h4>Order Items</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.product_name }}</td>
+            <td>₹{{ item.price }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>₹{{ item.price * item.quantity }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('orders') }}" class="btn btn-secondary">Back to Orders</a>
+{% endblock %}
