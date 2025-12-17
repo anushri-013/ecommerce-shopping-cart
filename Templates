@@ -1,0 +1,297 @@
+<!-- base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}E-Commerce{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 60px; }
+        .navbar-brand { font-weight: bold; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">🛒 E-Commerce</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if session.user_id %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('products') }}">Products</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('view_cart') }}">Cart</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('orders') }}">Orders</a></li>
+                        <li class="nav-item"><span class="nav-link">Hello, {{ session.username }}</span></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+<!-- index.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<div class="jumbotron text-center py-5">
+    <h1 class="display-4">Welcome to Our E-Commerce Store!</h1>
+    <p class="lead">Find the best products at amazing prices</p>
+    <hr class="my-4">
+    {% if not session.user_id %}
+        <a class="btn btn-primary btn-lg me-2" href="{{ url_for('register') }}">Get Started</a>
+        <a class="btn btn-outline-primary btn-lg" href="{{ url_for('login') }}">Login</a>
+    {% else %}
+        <a class="btn btn-primary btn-lg" href="{{ url_for('products') }}">Shop Now</a>
+    {% endif %}
+</div>
+{% endblock %}
+
+<!-- register.html -->
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><h4>Register</h4></div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Register</button>
+                </form>
+                <div class="mt-3 text-center">
+                    Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- login.html -->
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><h4>Login</h4></div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                </form>
+                <div class="mt-3 text-center">
+                    Don't have an account? <a href="{{ url_for('register') }}">Register here</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+<!-- products.html -->
+{% extends "base.html" %}
+
+{% block title %}Products{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Our Products</h2>
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text">
+                    <strong>Price:</strong> ₹{{ product.price }}<br>
+                    <strong>Stock:</strong> {{ product.stock }} available
+                </p>
+                <form method="POST" action="{{ url_for('add_to_cart', product_id=product.id) }}">
+                    <div class="input-group mb-3">
+                        <input type="number" name="quantity" class="form-control" value="1" min="1" max="{{ product.stock }}">
+                        <button class="btn btn-primary" type="submit">Add to Cart</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+
+<!-- cart.html -->
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Shopping Cart</h2>
+
+{% if items %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>₹{{ item.price }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>₹{{ item.subtotal }}</td>
+                <td>
+                    <a href="{{ url_for('remove_from_cart', product_id=item.id) }}" 
+                       class="btn btn-sm btn-danger">Remove</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3">Total:</th>
+                <th>₹{{ total }}</th>
+                <th></th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <form method="POST" action="{{ url_for('checkout') }}">
+        <button type="submit" class="btn btn-success btn-lg">Proceed to Checkout</button>
+    </form>
+{% else %}
+    <div class="alert alert-info">Your cart is empty. <a href="{{ url_for('products') }}">Continue shopping</a></div>
+{% endif %}
+{% endblock %}
+
+
+<!-- orders.html -->
+{% extends "base.html" %}
+
+{% block title %}My Orders{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">My Orders</h2>
+
+{% if orders %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Total</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>₹{{ order.total }}</td>
+                <td>{{ order.created_at }}</td>
+                <td>
+                    <a href="{{ url_for('order_detail', order_id=order.id) }}" 
+                       class="btn btn-sm btn-info">View Details</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="alert alert-info">You haven't placed any orders yet.</div>
+{% endif %}
+{% endblock %}
+
+<!-- ===================================== -->
+
+
+<!-- order_detail.html -->
+{% extends "base.html" %}
+
+{% block title %}Order Details{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Order #{{ order.id }}</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <p><strong>Order Date:</strong> {{ order.created_at }}</p>
+        <p><strong>Total Amount:</strong> ₹{{ order.total }}</p>
+    </div>
+</div>
+
+<h4>Order Items</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.product_name }}</td>
+            <td>₹{{ item.price }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>₹{{ item.price * item.quantity }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('orders') }}" class="btn btn-secondary">Back to Orders</a>
+{% endblock %}
