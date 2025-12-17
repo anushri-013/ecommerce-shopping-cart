@@ -2,7 +2,7 @@ E-Commerce Shopping Cart System
 
 A simple and efficient e-commerce application that demonstrates core online shopping functionalities such as product listing, cart management, order processing, and payment simulation. This project is designed for learning and implementing Object-Oriented Programming (OOP) concepts with database integration.
 
-🚀 Features
+>>Features
 
 User registration and login
 
@@ -18,7 +18,7 @@ Total price calculation
 
 SQLite database support
 
-🛠️ Technologies Used
+>>Technologies Used
 
 Python
 
@@ -26,4 +26,6 @@ SQLite
 
 OOP Concepts
 
-(Optional) Flask / Django for web version
+(Optional) Flask  web version
+
+vs code
